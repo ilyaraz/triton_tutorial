@@ -1,0 +1,17 @@
+[project]
+name = "pytorch-baseline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Ilya Razenshteyn", email = "ilya.razenshteyn@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+pytorch-baseline = "pytorch_baseline:main"
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
