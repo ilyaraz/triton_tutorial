@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
-from transformers import AutoTokenizer, AutoModelForCausalLM
-from transformers import Gemma3TextConfig, Gemma3ForCausalLM
+from transformers import Gemma3TextConfig, Gemma3ForCausalLM, GemmaTokenizerFast
 
 
 def get_device():
@@ -27,7 +26,12 @@ def main():
         dtype = torch.float32
 
     # Tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = GemmaTokenizerFast.from_pretrained(
+        "google/gemma-3-1b-it",
+        padding_side="left",      # optional overrides, matches the config defaults
+        trust_remote_code=False,  # same default as AutoTokenizer
+    )
+    # tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     # Attention implementation:
     #  - "sdpa" is best on CUDA
