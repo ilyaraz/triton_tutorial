@@ -30,7 +30,6 @@ def main():
                 "role": "user",
                 "content": [
                     {"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
-                    #{"type": "text", "text": "What's up dog!"},
                 ],
             },
         ],
@@ -49,7 +48,7 @@ def main():
     past_key_values = None
     eos_token_ids = model.generation_config.eos_token_id
 
-    max_new_tokens = 128000
+    max_new_tokens = 32000
     with torch.inference_mode():
         for step in range(max_new_tokens):
             outputs = model(
