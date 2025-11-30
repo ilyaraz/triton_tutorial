@@ -4,38 +4,16 @@ from transformers import Gemma3TextConfig, Gemma3ForCausalLM, GemmaTokenizerFast
 import sys
 
 
-def get_device():
-    if torch.backends.mps.is_available():
-        return torch.device("mps")
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
-
-
 def main():
     model_id = "google/gemma-3-1b-it"  # 1B instruct, text-only
-    device = get_device()
-    print(f"Using device: {device}")
+    device = torch.device("mps") 
 
-    if device.type in ("mps", "cuda"):
-        dtype = torch.float16
-    else:
-        dtype = torch.float32
-
-    tokenizer = GemmaTokenizerFast.from_pretrained(
-        "google/gemma-3-1b-it",
-        padding_side="left",
-        trust_remote_code=False,
-    )
-
-    attn_impl = "eager" if device.type == "mps" else "sdpa"
-
-    config = Gemma3TextConfig.from_pretrained("google/gemma-3-1b-it")
+    tokenizer = GemmaTokenizerFast.from_pretrained("google/gemma-3-1b-it")
     model = Gemma3ForCausalLM.from_pretrained(
         "google/gemma-3-1b-it",
-        config=config,
-        dtype=dtype,
-        attn_implementation=attn_impl,
+        config=Gemma3TextConfig.from_pretrained("google/gemma-3-1b-it"),
+        dtype=torch.float16,
+        attn_implementation="eager",
     )
     model.to(device)
     model.eval()
@@ -66,15 +44,12 @@ def main():
         return_tensors="pt",
     )
 
-    inputs = {k: v.to(device) for k, v in inputs.items()}
-
-    input_ids = inputs["input_ids"]
-    attention_mask = inputs.get("attention_mask")
+    input_ids = inputs["input_ids"].to(device)
     eos_token_ids = model.generation_config.eos_token_id
     max_new_tokens = 128000
 
     cur_input_ids = input_ids
-    cur_attention_mask_length = attention_mask.shape[1]
+    cur_attention_mask_length = inputs["attention_mask"].shape[1]
     past_key_values = None
 
     with torch.inference_mode():
