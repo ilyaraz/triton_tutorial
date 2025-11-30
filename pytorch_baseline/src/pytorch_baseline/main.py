@@ -31,7 +31,6 @@ def main():
         padding_side="left",      # optional overrides, matches the config defaults
         trust_remote_code=False,  # same default as AutoTokenizer
     )
-    # tokenizer = AutoTokenizer.from_pretrained(model_id)
 
     # Attention implementation:
     #  - "sdpa" is best on CUDA
@@ -60,7 +59,8 @@ def main():
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
+                    #{"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
+                    {"type": "text", "text": "What's up dog!"},
                 ],
             },
         ],
@@ -85,12 +85,6 @@ def main():
         k: v for k, v in inputs.items() if k not in ("input_ids", "attention_mask")
     }
     eos_token_ids = model.generation_config.eos_token_id
-    if eos_token_ids is None:
-        eos_token_ids = tokenizer.eos_token_id
-    if eos_token_ids is None:
-        eos_token_ids = []
-    elif isinstance(eos_token_ids, int):
-        eos_token_ids = [eos_token_ids]
     max_new_tokens = 128000
 
     generated_tokens = None
@@ -129,9 +123,7 @@ def main():
             )[0]
             print(f"[step {step + 1}] {current_text}")
 
-            if eos_token_ids and all(
-                token.item() in eos_token_ids for token in next_token.view(-1)
-            ):
+            if all(token.item() in eos_token_ids for token in next_token.view(-1)):
                 break
 
             cur_input_ids = next_token
@@ -140,19 +132,6 @@ def main():
                     [cur_attention_mask, torch.ones_like(next_token)],
                     dim=-1,
                 )
-
-    if generated_tokens is not None:
-        output_ids = torch.cat([input_ids, generated_tokens], dim=-1)
-    else:
-        output_ids = input_ids
-
-    output_text = tokenizer.batch_decode(
-        output_ids,
-        skip_special_tokens=True,
-    )[0]
-
-    print("=== Model output ===")
-    print(output_text)
 
 
 if __name__ == "__main__":
