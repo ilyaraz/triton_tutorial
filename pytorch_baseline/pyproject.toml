@@ -7,7 +7,10 @@ authors = [
     { name = "Ilya Razenshteyn", email = "ilya.razenshteyn@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "torch>=2.9.1",
+    "transformers>=4.57.3",
+]
 
 [project.scripts]
 pytorch-baseline = "pytorch_baseline:main"
