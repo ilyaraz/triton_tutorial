@@ -5,13 +5,13 @@ import sys
 
 
 def main():
-    model_id = "google/gemma-3-1b-it"  # 1B instruct, text-only
     device = torch.device("mps") 
 
-    tokenizer = GemmaTokenizerFast.from_pretrained("google/gemma-3-1b-it")
+    model_id = "google/gemma-3-1b-it"
+    tokenizer = GemmaTokenizerFast.from_pretrained(model_id)
     model = Gemma3ForCausalLM.from_pretrained(
-        "google/gemma-3-1b-it",
-        config=Gemma3TextConfig.from_pretrained("google/gemma-3-1b-it"),
+        model_id,
+        config=Gemma3TextConfig.from_pretrained(model_id),
         dtype=torch.float16,
         attn_implementation="eager",
     )
@@ -44,14 +44,12 @@ def main():
         return_tensors="pt",
     )
 
-    input_ids = inputs["input_ids"].to(device)
-    eos_token_ids = model.generation_config.eos_token_id
-    max_new_tokens = 128000
-
-    cur_input_ids = input_ids
+    cur_input_ids = inputs["input_ids"].to(device)
     cur_attention_mask_length = inputs["attention_mask"].shape[1]
     past_key_values = None
+    eos_token_ids = model.generation_config.eos_token_id
 
+    max_new_tokens = 128000
     with torch.inference_mode():
         for step in range(max_new_tokens):
             outputs = model(
@@ -60,7 +58,6 @@ def main():
                 use_cache=True,
                 attention_mask=torch.ones(1, cur_attention_mask_length, dtype=torch.long),
             )
-            past_key_values = outputs.past_key_values
 
             next_token_logits = outputs.logits[:, -1, :].float()
             next_token_probs = F.softmax(next_token_logits, dim=-1)
@@ -75,6 +72,7 @@ def main():
 
             cur_input_ids = next_token
             cur_attention_mask_length += 1
+            past_key_values = outputs.past_key_values
 
 
 if __name__ == "__main__":
