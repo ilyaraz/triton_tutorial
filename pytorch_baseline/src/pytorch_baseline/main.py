@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from transformers import Gemma3TextConfig, Gemma3ForCausalLM, GemmaTokenizerFast
+import sys
 
 
 def get_device():
@@ -50,8 +51,8 @@ def main():
             {
                 "role": "user",
                 "content": [
-                    #{"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
-                    {"type": "text", "text": "What's up dog!"},
+                    {"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
+                    #{"type": "text", "text": "What's up dog!"},
                 ],
             },
         ],
@@ -90,10 +91,12 @@ def main():
             next_token_probs = F.softmax(next_token_logits, dim=-1)
             next_token = torch.multinomial(next_token_probs, num_samples=1)
 
-            print(next_token)
-
             if next_token.item() in eos_token_ids:
                 break
+
+            decoded_token = tokenizer.decode(next_token.squeeze(0).tolist())
+            sys.stdout.write(decoded_token)
+            sys.stdout.flush()
 
             cur_input_ids = next_token
             cur_attention_mask_length += 1
