@@ -2,17 +2,17 @@ import torch
 import torch.nn.functional as F
 from transformers import Gemma3TextConfig, Gemma3ForCausalLM, GemmaTokenizerFast
 import sys
+import fire
 
 
-def main():
-    device = torch.device("mps") 
+def main(prompt, model_id="google/gemma-3-1b-it", device="mps", max_new_tokens=32000):
+    device = torch.device(device)
 
-    model_id = "google/gemma-3-1b-it"
     tokenizer = GemmaTokenizerFast.from_pretrained(model_id)
     model = Gemma3ForCausalLM.from_pretrained(
         model_id,
         config=Gemma3TextConfig.from_pretrained(model_id),
-        dtype=torch.float16,
+        dtype=torch.bfloat16,
         attn_implementation="eager",
     )
     model.to(device)
@@ -29,7 +29,7 @@ def main():
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
+                    {"type": "text", "text": prompt},
                 ],
             },
         ],
@@ -48,7 +48,6 @@ def main():
     past_key_values = None
     eos_token_ids = model.generation_config.eos_token_id
 
-    max_new_tokens = 32000
     with torch.inference_mode():
         for step in range(max_new_tokens):
             outputs = model(
@@ -75,4 +74,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    fire.Fire(main)
