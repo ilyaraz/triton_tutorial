@@ -53,11 +53,10 @@ def main():
             {
                 "role": "user",
                 "content": [
-                    #{"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
-                    {"type": "text", "text": "Hi, how are you? What's up bro?"},
+                    {"type": "text", "text": "Write code that uses PyTorch and Transformers to do LLM inference using Gemma 3 model, please!"},
                 ],
             },
-        ]
+        ],
     ]
 
     # Use the tokenizer's chat template
