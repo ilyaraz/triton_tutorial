@@ -1,14 +1,22 @@
 import sys
 
-import fire
 import torch
 import torch.nn.functional as F
+import typer
 
 from transformers import Gemma3ForCausalLM, Gemma3TextConfig, GemmaTokenizerFast
 
+app = typer.Typer()
 
-def main(prompt, model_id="google/gemma-3-1b-it", device="mps", max_new_tokens=32000):
-    device = torch.device(device)
+
+@app.command()
+def main(
+    prompt: str,
+    model_id: str = "google/gemma-3-1b-it",
+    device_name: str = "mps",
+    max_new_tokens: int = 32000,
+) -> None:
+    device = torch.device(device_name)
 
     tokenizer = GemmaTokenizerFast.from_pretrained(model_id)
     model = Gemma3ForCausalLM.from_pretrained(
@@ -78,4 +86,4 @@ def main(prompt, model_id="google/gemma-3-1b-it", device="mps", max_new_tokens=3
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    app()
