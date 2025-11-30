@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import Gemma3TextConfig, Gemma3ForCausalLM
 
 
 def get_device():
@@ -33,8 +34,10 @@ def main():
     #  - "eager" is usually safer on MPS / CPU
     attn_impl = "eager" if device.type == "mps" else "sdpa"
 
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id,
+    config = Gemma3TextConfig.from_pretrained("google/gemma-3-1b-it")
+    model = Gemma3ForCausalLM.from_pretrained(
+        "google/gemma-3-1b-it",
+        config=config,
         dtype=dtype,
         attn_implementation=attn_impl,
     )
