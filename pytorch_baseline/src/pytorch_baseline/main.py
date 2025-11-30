@@ -1,8 +1,10 @@
+import sys
+
+import fire
 import torch
 import torch.nn.functional as F
-from transformers import Gemma3TextConfig, Gemma3ForCausalLM, GemmaTokenizerFast
-import sys
-import fire
+
+from transformers import Gemma3ForCausalLM, Gemma3TextConfig, GemmaTokenizerFast
 
 
 def main(prompt, model_id="google/gemma-3-1b-it", device="mps", max_new_tokens=32000):
@@ -49,12 +51,14 @@ def main(prompt, model_id="google/gemma-3-1b-it", device="mps", max_new_tokens=3
     eos_token_ids = model.generation_config.eos_token_id
 
     with torch.inference_mode():
-        for step in range(max_new_tokens):
+        for _ in range(max_new_tokens):
             outputs = model(
                 input_ids=cur_input_ids,
                 past_key_values=past_key_values,
                 use_cache=True,
-                attention_mask=torch.ones(1, cur_attention_mask_length, dtype=torch.long),
+                attention_mask=torch.ones(
+                    1, cur_attention_mask_length, dtype=torch.long
+                ),
             )
 
             next_token_logits = outputs.logits[:, -1, :].float()
