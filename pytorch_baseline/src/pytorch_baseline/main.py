@@ -15,6 +15,7 @@ def main(
     model_id: str = "google/gemma-3-1b-it",
     device_name: str = "mps",
     max_new_tokens: int = 32000,
+    attention_impl: str = "eager",
 ) -> None:
     device = torch.device(device_name)
 
@@ -23,7 +24,7 @@ def main(
         model_id,
         config=Gemma3TextConfig.from_pretrained(model_id),
         dtype=torch.bfloat16,
-        attn_implementation="eager",
+        attn_implementation=attention_impl,
     )
     model.to(device)
     model.eval()
